@@ -25,10 +25,32 @@ import java.util.Random;
  * @auther <a href="mailto:lly835@163.com">廖师兄</a>
  * @since 1.0
  */
+
+/**
+ * @Controller用于标记在一个类上，使用它标记的类就是一个SpringMvc Controller对象，分发处理器会扫描使用该注解的类的方法，并检测该方法是否使用了@RequestMapping注解。
+ * @Controller只是定义了一个控制器类，而使用@RequestMapping注解的方法才是处理请求的处理器。
+ * @Controller标记在一个类上还不能真正意义上说它就是SpringMvc的控制器，应为这个时候Spring还不认识它，这个时候需要把这个控制器交给Spring来管理。
+ * 有两种方式可以管理：
+ * 基于注解的装配
+ * 方式一
+ * <bean class="com.HelloWorld"/>
+ * 方式二
+ * 路径写到controller的上一层
+ * <context:component-scan base-package="com"/>
+ */
 @Controller
+/**
+ * 如果不想每次都写private  final Logger logger = LoggerFactory.getLogger(当前类名.class); 可以用注解@Slf4j;
+ * 1.使用idea首先需要安装Lombok插件;
+ * 2.在pom文件加入lombok的依赖
+ * 3.类上面添加@Sl4j注解,然后使用log打印日志;
+ */
 @Slf4j
 public class PayController {
 
+    /**
+     * @Autowired是用在JavaBean中的注解，通过byType形式，用来给指定的字段或方法注入所需的外部资源。
+     */
     @Autowired
     private WechatAccountConfig wechatAccountConfig;
 
@@ -39,7 +61,34 @@ public class PayController {
      * 发起支付
      */
     @PostMapping(value = "/pay")
+    /**
+     * 等价于@RequestMapping(value = "/pay",method = RequestMethod.POST)
+     */
+    /**
+     * @ResponseBody注解作用与原理
+     * 1、概念
+     *         注解 @ResponseBody，使用在控制层（controller）的方法上。
+     * 2、作用
+     *         作用：将方法的返回值，以特定的格式写入到response的body区域，进而将数据返回给客户端。
+     *         当方法上面没有写ResponseBody,底层会将方法的返回值封装为ModelAndView对象。
+     *         如果返回值是字符串，那么直接将字符串写到客户端；如果是一个对象，会将对象转化为json串，然后写到客户端。
+     * 3、注意编码
+     *         如果返回对象,按utf-8编码。如果返回String，默认按iso8859-1编码，页面可能出现乱码。因此在注解中我们可以手动修改编码格式，
+     *         例如@RequestMapping(value="/cat/query",produces="text/html;charset=utf-8")，前面是请求的路径，后面是编码格式。
+     *
+     * 4、原理
+     *         控制层方法的返回值是如何转化为json格式的字符串的？其实是通过HttpMessageConverter中的方法实现的，它本是一个接口，在其实现类完成转换。
+     *         如果是bean对象，会调用对象的getXXX（）方法获取属性值并且以键值对的形式进行封装，进而转化为json串。
+     *         如果是map集合，采用get(key)方式获取value值，然后进行封装。
+     */
     @ResponseBody
+    /**
+     * @RequestParam：将请求参数绑定到你控制器的方法参数上（是springmvc中接收普通参数的注解）
+     * 语法：@RequestParam(value=”参数名”,required=”true/false”,defaultValue=””)
+     * value：参数名
+     * required：是否包含该参数，默认为true，表示该请求路径中必须包含该参数，如果不包含就报错。
+     * defaultValue：默认参数值，如果设置了该值，required=true将失效，自动为false,如果没有传该参数，就使用默认值
+     */
     public PayResponse pay(@RequestParam(value = "openid", required = false) String openid,
                            @RequestParam BestPayTypeEnum payType,
                            @RequestParam String orderId,
